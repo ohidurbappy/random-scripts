@@ -1,5 +1,16 @@
 <?php
 
+// output RSS feed to HTML
+// output_rss_feed('http://feeds.systutorials.com/ericfeed', 20, true, true, 200);
+
+//styling
+/*
+.feed-description {padding-left:10px;margin-left:10px;border-left:2px solid #eee;}
+.feed-lists {padding-left:1em;}
+.feed-item-image {max-width: 300px; max-height: 200px; float: right; margin-left: 10px; }
+
+*/
+
 // Check http://www.systutorials.com/136102/a-php-function-for-fetching-rss-feed-and-outputing-feed-items-as-html/ for description
 
 // RSS to HTML

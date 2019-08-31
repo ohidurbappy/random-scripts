@@ -1,5 +1,7 @@
 <?php
 
+// another tutorial https://code.tutsplus.com/articles/how-to-read-an-rss-feed-with-php-screencast--net-1272
+
 // output RSS feed to HTML
 // output_rss_feed('http://feeds.systutorials.com/ericfeed', 20, true, true, 200);
 

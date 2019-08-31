@@ -1,3 +1,3 @@
-# Welcome to another <b>Script Kiddy's</b>github id
+# Welcome to another Script Kiddy's github id
 ## random-scripts
 Collection of random scripts

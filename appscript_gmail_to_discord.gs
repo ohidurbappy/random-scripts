@@ -1,74 +1,90 @@
 // You will also need to create a gmail filter to add the 'discord' label
 // to any emails you want sent to discord
-//Creating a front-end so less technically proficient users
-//can just enter the labels they are using, the webhooks for the channels they need,
-//and the bot name/picture/text and formatted message
-
-
 // must add gmail api from Resource > Advanced Google Services
-// https://developers.google.com/gmail/api/quickstart/apps-script
-// https://developers.google.com/apps-script/guides/services/advanced#enabling_advanced_services
-
-
 // add time trigger for this project in google app script homepage (to run periodically)
 // to run it -> run -> sendEmailsToDiscord (runs once)
 
-function sendEmailsToDiscord() {
-    var label = GmailApp.getUserLabelByName('discord');
+function truncate(str, n) {
+    return (str.length > n) ? str.substr(0, n - 1) + '...' : str;
+};
+
+function sleepFor(sleepDuration) {
+    var now = new Date().getTime();
+    while (new Date().getTime() < now + sleepDuration) {
+        /* do nothing */
+    }
+}
+
+async function sendEmailsToDiscord() {
+    var label = GmailApp.getUserLabelByName('New');
     var messages = [];
     var threads = label.getThreads();
-  
+
     for (var i = 0; i < threads.length; i++) {
         messages = messages.concat(threads[i].getMessages())
     }
 
     for (var i = 0; i < messages.length; i++) {
+
         var message = messages[i];
         Logger.log(message);
-
-        var output = '\n*New Email*';
-        output += '\n*from:* ' + message.getFrom();
-        //For person use, the two lines below aren't immediately needed
+        
+        var output = message.getFrom() + ": " + message.getSubject();
+        //output += '\n*From:* ' + message.getFrom();
         //output += '\n*to:* ' + message.getTo();
         //output += '\n*cc:* ' + message.getCc();
-        output += '\n*date:* ' + message.getDate();
-        output += '\n*subject:* ' + message.getSubject();
-        output += '\n*body:* ' + message.getPlainBody();
+        //output += '\n*Date:* ' + message.getDate();
+        //output += '\n*Subject:* ' + message.getSubject();
+        //output += '\n*Body:* ' + message.getPlainBody();
         Logger.log(output);
 
         var payload = {
-            //Text, channel, and icon emoji aren't supported by Discord
-            //So content is the replacement for text, username remains the same
-            //Channel is redundant as Discord webhooks are for individual channels
-          //'username': 'Forum Updates Bot',
+            //'username': 'Forum Updates Bot',
             'content': output,
-          'embeds':[
-            {
-            'title':'New Message',
-            'description':'New message in gmail'
-            }
-          
-          ]
+            'embeds': [{
+                'title': message.getFrom() + " sent a new Email",
+                "url": "https://gmail.com",
+                'description': `You have received a new Email on [Gmail](https://www.gmail.com) from ${message.getFrom()} to ${message.getTo} at ${message.getDate()}`,
+                "color": 5439368,
+                "footer": {
+                    "icon_url": "https://cdn.discordapp.com/attachments/740262095827894322/746756267048960020/gmail.png",
+                    "text": "Gmail Discord Notifier"
+                },
+                "fields": [{
+                        "name": "From",
+                        "value": message.getFrom()
+                    },
+                    {
+                        "name": "To",
+                        "value": message.getTo()
+                    }, 
+                    {
+                        "name": "Subject",
+                        "value": message.getSubject()
+                    },
+                    {
+                        "name": "Message",
+                        "value": truncate(message.getPlainBody(), 1000)
+                    }
+
+                ]
+            }, ]
         };
 
         var options = {
-            'method' : 'post',
-            'payload' : Utilities.jsonStringify(payload),
-          "headers" : {
-       "Content-Type" : "application/json"
-     }
+            'method': 'post',
+            'payload': Utilities.jsonStringify(payload),
+            'muteHttpExceptions': true,
+            "headers": {
+                "Content-Type": "application/json"
+            }
         };
 
-        // replace this with your own Discord webhook URL
-        // https://crowdscores.slack.com/services
-        var webhookURL = '';
-        //Expanding if/else to send messages to each channel for further categorization
-        if (message.getSubject() == "Office of Citizenship has a new topic"){webhookUrl = 'https://discordapp.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxx';}
-        else{webhookUrl = 'https://discordapp.com/api/webhooks/xxxxxxxxxxxxxxxxxxx';}
-        UrlFetchApp.fetch(webhookUrl, options);
-   }
+        var webhookURL = 'PUT_YOUR_DISCORD_WEBHOOK_URL_HERE';
+        UrlFetchApp.fetch(webhookURL, options);
+        threads[i].removeLabel(label);
 
-   // remove the label from these threads so we don't send them to
-   // slack again next time the script is run
-   label.removeFromThreads(threads);
+    }
+
+    //   label.removeFromThreads(threads);
 }
